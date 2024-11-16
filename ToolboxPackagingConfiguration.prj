@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
-  <configuration file="/home/ben/h5parser/ToolboxPackagingConfiguration.prj" location="/home/ben/h5parser" name="ToolboxPackagingConfiguration" target="target.toolbox" target-name="Package Toolbox">
+  <configuration build-checksum="2294542364" file="/home/ben/hytech_software/h5parser/ToolboxPackagingConfiguration.prj" location="/home/ben/hytech_software/h5parser" name="ToolboxPackagingConfiguration" target="target.toolbox" target-name="Package Toolbox">
     <param.appname>h5parser</param.appname>
     <param.authnamewatermark />
     <param.email />
@@ -7,7 +7,7 @@
     <param.summary />
     <param.description />
     <param.screenshot />
-    <param.version>1.0</param.version>
+    <param.version>1.1</param.version>
     <param.output>${PROJECT_ROOT}/h5parser.mltbx</param.output>
     <param.products.name />
     <param.products.id />
@@ -41,7 +41,9 @@ resources/_Project/*
 **/*.prj
 ToolboxPackagingConfiguration.prj
 package.m
-resources/</param.exclude.filters>
+resources/
+*.h5
+.gitignore</param.exclude.filters>
     <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
     <param.examples />
     <param.demosxml />
@@ -75,7 +77,6 @@ resources/</param.exclude.filters>
       <param.summary />
       <param.description />
       <param.screenshot />
-      <param.version />
       <param.output />
       <param.products.name />
       <param.products.id />
@@ -110,6 +111,8 @@ resources/</param.exclude.filters>
       <file>${PROJECT_ROOT}</file>
     </fileset.rootdir>
     <fileset.rootfiles>
+      <file>${PROJECT_ROOT}/.git</file>
+      <file>${PROJECT_ROOT}/README.md</file>
       <file>${PROJECT_ROOT}/functions</file>
       <file>${PROJECT_ROOT}/toolboxContents.m</file>
       <file>${PROJECT_ROOT}/toolboxInfo.m</file>
@@ -118,7 +121,7 @@ resources/</param.exclude.filters>
     <fileset.depfun.excluded />
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}" name="h5parser.mltbx" optional="false">/home/ben/h5parser/h5parser.mltbx</file>
+      <file location="${PROJECT_ROOT}" name="h5parser.mltbx" optional="false">/home/ben/hytech_software/h5parser/h5parser.mltbx</file>
     </build-deliverables>
     <workflow />
     <matlab>
@@ -147,7 +150,7 @@ resources/</param.exclude.filters>
       <vista>false</vista>
       <linux>true</linux>
       <solaris>false</solaris>
-      <osver>6.10.11-100.fc39.x86_64</osver>
+      <osver>6.2.9-300.fc38.x86_64</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>glnxa64</arch>

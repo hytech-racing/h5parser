@@ -49,21 +49,26 @@ function [data_struct] = parse(filename, check_fields_on_all_chunks)
     
     % Initialize the output structure
     data_struct = struct();
-    
+    % Extract all Names from the struct array
+    groupNames = {info.Groups.Groups.Name}; 
     % Iterate through the groups in the HDF5 file
-    for i = (1:length(info.Groups.Groups))
-        dataset_len = length(info.Groups.Groups(i).Datasets);
+    for i = (0:(length(info.Groups.Groups)-1))
+        name = "/data/chunk_"+string(i);
+        % Find the index of the matching name
+        index = find(strcmp(groupNames, name), 1);
+
+        dataset_len = length(info.Groups.Groups(index).Datasets);
         
         % Iterate through the datasets in each group
         for j = (1:dataset_len)
             % Get the name of the dataset
-            data_field_name = info.Groups.Groups(i).Datasets(j).Name;
+            data_field_name = info.Groups.Groups(index).Datasets(j).Name;
             
             % Read the dataset data
-            data = h5read(filename, info.Groups.Groups(i).Name+"/"+data_field_name);
+            data = h5read(filename, info.Groups.Groups(index).Name+"/"+data_field_name);
             
             % If not the first group, check if data needs to be appended
-            if(i > 1)
+            if(i > 0)
                 if(do_check)
                     % If checking, append data to existing field if it exists
                     if(anyisfield(data_struct, data_field_name))
