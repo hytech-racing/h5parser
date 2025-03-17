@@ -67,21 +67,25 @@ function [data_struct] = parse(filename, check_fields_on_all_chunks)
             % Read the dataset data
             data = h5read(filename, info.Groups.Groups(index).Name+"/"+data_field_name);
             
+            
             % If not the first group, check if data needs to be appended
             if(i > 0)
                 if(do_check)
                     % If checking, append data to existing field if it exists
                     if(anyisfield(data_struct, data_field_name))
-                        data = [getfld(data_struct, data_field_name).' data];
+                        data_struct.(data_field_name).Message = [data_struct.(data_field_name).Message; data.Message];
+                        data_struct.(data_field_name).Timestamp = [data_struct.(data_field_name).Timestamp; data.Timestamp];
                     end
                 else
                     % Append data to the existing field unconditionally
-                    data = [getfld(data_struct, data_field_name).' data];
+                    data.Message = [getfld(data_struct, data_field_name).Message; data.Message];
+                    data.Timestamp = [getfld(data_struct, data_field_name).Timestamp; data.Timestamp];
                 end
             end
             
             % Set the data in the structure
             data_struct = setfld(data_struct, data_field_name, data.');
+
         end
     end
     
