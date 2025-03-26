@@ -7,8 +7,11 @@
 
 ## usage:
 `parse('name_of_h5_file.h5')`
+`parseTable('name_of_h5_file.h5')`
 
 OR
 
 `parse('name_of_h5_file.h5', true)`
+`parseTable('name_of_h5_file.h5', true)`
+
 for safer (but slower parsing) if there exists intermittent data throughout the file and not all data exists at all points in time
