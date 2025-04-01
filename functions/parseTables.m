@@ -1,4 +1,4 @@
-% parse - Reads data from an HDF5 file and organizes it into a structured format.
+% parseTable - Reads data from an HDF5 file and organizes it into a structured format.
 % 
 % This function reads datasets from an HDF5 file and stores them in a MATLAB
 % structure. If the optional argument `check_fields_on_all_chunks` is provided,
@@ -8,8 +8,8 @@
 % not others in the underlying logs). however, it will slow parsing down
 % 
 % Syntax:
-%   data_struct = parse(filename)
-%   data_struct = parse(filename, check_fields_on_all_chunks)
+%   data_struct = parseTable(filename)
+%   data_struct = parseTable(filename, check_fields_on_all_chunks)
 %
 % Inputs:
 %   filename (string) - Path to the HDF5 file to read data from.
@@ -22,17 +22,16 @@
 %     and the data stored as the field value.
 %
 % Example:
-%   data = parse('data.h5');  % Reads the data from 'data.h5' into a structure.
-%   data = parse('data.h5', true);  % Checks if fields exist and appends data.
+%   data = parseTable('data.h5');  % Reads the data from 'data.h5' into a structure.
+%   data = parseTable('data.h5', true);  % Checks if fields exist and appends data.
 %
 % Notes:
-%   - The function assumes that the HDF5 file consists of groups containing datasets.
 %   - The datasets are appended to existing fields in the structure when `i > 1`.
 %   - The datasets' names are used as the field names in the output structure.
 %
 % See also: h5info, h5read, setfld, getfld
 
-function [data_struct] = parse(filename, check_fields_on_all_chunks)
+function [data_struct] = parseTable(filename, check_fields_on_all_chunks)
     % Default value for checking fields
     do_check = false;
     
@@ -51,7 +50,7 @@ function [data_struct] = parse(filename, check_fields_on_all_chunks)
     data_struct = struct();
     % Extract all Names from the struct array
     groupNames = {info.Groups.Groups.Name}; 
-    % Iterate through the groups in the HDF5 file
+    % Iterate through the groups in the HDF5 file // chunks
     for i = (0:(length(info.Groups.Groups)-1))
         name = "/data/chunk_"+string(i);
         % Find the index of the matching name
@@ -67,27 +66,26 @@ function [data_struct] = parse(filename, check_fields_on_all_chunks)
             % Read the dataset data
             data = h5read(filename, info.Groups.Groups(index).Name+"/"+data_field_name);
             
+            data = struct2table(data)
             
             % If not the first group, check if data needs to be appended
             if(i > 0)
                 if(do_check)
                     % If checking, append data to existing field if it exists
                     if(anyisfield(data_struct, data_field_name))
-                        data_struct.(data_field_name).Message = [data_struct.(data_field_name).Message; data.Message];
-                        data_struct.(data_field_name).Timestamp = [data_struct.(data_field_name).Timestamp; data.Timestamp];
+                        data = [getfld(data_struct, data_field_name) ; data];
                     end
                 else
                     % Append data to the existing field unconditionally
-                    data.Message = [getfld(data_struct, data_field_name).Message; data.Message];
-                    data.Timestamp = [getfld(data_struct, data_field_name).Timestamp; data.Timestamp];
+                    data = [getfld(data_struct, data_field_name) ; data];
                 end
             end
             
             % Set the data in the structure
-            data_struct = setfld(data_struct, data_field_name, data.');
-
+            data_struct = setfld(data_struct, data_field_name, data);
         end
     end
+
     
     % End timer and display elapsed time
     toc
