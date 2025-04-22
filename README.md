@@ -6,6 +6,7 @@
 4. profit
 
 ## usage:
+
 `parse('name_of_h5_file.h5')`
 `parseTable('name_of_h5_file.h5')`
 
