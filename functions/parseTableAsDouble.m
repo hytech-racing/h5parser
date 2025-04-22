@@ -1,4 +1,4 @@
-% parseTable - Reads data from an HDF5 file and organizes it into a structured format.
+% parseTableAsDouble - Reads data from an HDF5 file and organizes it into a structured format.
 % 
 % This function reads datasets from an HDF5 file and stores them in a MATLAB
 % structure. If the optional argument `check_fields_on_all_chunks` is provided,
@@ -8,8 +8,8 @@
 % not others in the underlying logs). however, it will slow parsing down
 % 
 % Syntax:
-%   data_struct = parseTable(filename)
-%   data_struct = parseTable(filename, check_fields_on_all_chunks)
+%   data_struct = parseTableAsDouble(filename)
+%   data_struct = parseTableAsDouble(filename, check_fields_on_all_chunks)
 %
 % Inputs:
 %   filename (string) - Path to the HDF5 file to read data from.
@@ -22,8 +22,8 @@
 %     and the data stored as the field value.
 %
 % Example:
-%   data = parseTable('data.h5');  % Reads the data from 'data.h5' into a structure.
-%   data = parseTable('data.h5', true);  % Checks if fields exist and appends data.
+%   data = parseTableAsDouble('data.h5');  % Reads the data from 'data.h5' into a structure.
+%   data = parseTableAsDouble('data.h5', true);  % Checks if fields exist and appends data.
 %
 % Notes:
 %   - The datasets are appended to existing fields in the structure when `i > 1`.
@@ -31,7 +31,7 @@
 %
 % See also: h5info, h5read, setfld, getfld
 
-function [data_struct] = parseTable(filename, check_fields_on_all_chunks)
+function [data_struct] = parseTableAsDouble(filename, check_fields_on_all_chunks)
     % Default value for checking fields
     do_check = false;
     
@@ -67,20 +67,29 @@ function [data_struct] = parseTable(filename, check_fields_on_all_chunks)
             data = h5read(filename, info.Groups.Groups(index).Name+"/"+data_field_name);
             
             data = struct2table(data)
+            data = movevars(data,"Data",'After',"Timestamp");
             
             % If not the first group, check if data needs to be appended
             if(i > 0)
                 if(do_check)
+                    if (isa(data{1,"Data"},'numeric'))
+                        data.Data = double(data.Data)
+                    end
                     % If checking, append data to existing field if it exists
                     if(anyisfield(data_struct, data_field_name))
                         data = [getfld(data_struct, data_field_name) ; data];
                     end
                 else
+                    if (isa(data{1,"Data"},'numeric'))
+                        data.Data = double(data.Data)
+                    end
                     % Append data to the existing field unconditionally
                     data = [getfld(data_struct, data_field_name) ; data];
                 end
             end
-            
+            if (isa(data{1,"Data"},'numeric'))
+                data.Data = double(data.Data)
+            end
             % Set the data in the structure
             data_struct = setfld(data_struct, data_field_name, data);
         end

@@ -5,6 +5,8 @@ function contents = toolboxContents
         'functions/getfld.m', 
         'functions/setfld.m', 
         'functions/parse.m'
-        'functions/parseTables.m'
+        'functions/parseAsDouble.m'
+        'functions/parseTable.m'
+        'functions/parseTableAsDouble.m'
     };
 end
