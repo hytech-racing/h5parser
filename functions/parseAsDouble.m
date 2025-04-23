@@ -23,9 +23,10 @@
 %
 % Example:
 %   data = parseAsDouble('data.h5');  % Reads the data from 'data.h5' into a structure.
-%   data = parseTable('data.h5', true);  % Checks if fields exist and appends data.
+%   data = parseAsDouble('data.h5', true);  % Checks if fields exist and appends data.
 %
 % Notes:
+%   - The function assumes that the HDF5 file consists of groups containing datasets.
 %   - The datasets are appended to existing fields in the structure when `i > 1`.
 %   - The datasets' names are used as the field names in the output structure.
 %
@@ -50,7 +51,7 @@ function [data_struct] = parseAsDouble(filename, check_fields_on_all_chunks)
     data_struct = struct();
     % Extract all Names from the struct array
     groupNames = {info.Groups.Groups.Name}; 
-    % Iterate through the groups in the HDF5 file // chunks
+    % Iterate through the groups in the HDF5 file
     for i = (0:(length(info.Groups.Groups)-1))
         name = "/data/chunk_"+string(i);
         % Find the index of the matching name
@@ -66,34 +67,36 @@ function [data_struct] = parseAsDouble(filename, check_fields_on_all_chunks)
             % Read the dataset data
             data = h5read(filename, info.Groups.Groups(index).Name+"/"+data_field_name);
             
-            data = struct2table(data)
             
             % If not the first group, check if data needs to be appended
             if(i > 0)
                 if(do_check)
-                    if (isa(data{1,"Data"},'numeric'))
+                    if (isa(data.Data,'numeric'))
                         data.Data = double(data.Data)
                     end
                     % If checking, append data to existing field if it exists
                     if(anyisfield(data_struct, data_field_name))
-                        data = [getfld(data_struct, data_field_name) ; data];
+                        data_struct.(data_field_name).Data = [data_struct.(data_field_name).Data; data.Data];
+                        data_struct.(data_field_name).Timestamp = [data_struct.(data_field_name).Timestamp; data.Timestamp];
                     end
                 else
-                    if (isa(data{1,"Data"},'numeric'))
+                    if (isa(data.Data,'numeric'))
                         data.Data = double(data.Data)
                     end
                     % Append data to the existing field unconditionally
-                    data = [getfld(data_struct, data_field_name) ; data];
+                    data.Data = [getfld(data_struct, data_field_name).Data; data.Data];
+                    data.Timestamp = [getfld(data_struct, data_field_name).Timestamp; data.Timestamp];
                 end
             end
-            if (isa(data{1,"Data"},'numeric'))
+            if (isa(data.Data,'numeric'))
                 data.Data = double(data.Data)
             end
+            
             % Set the data in the structure
-            data_struct = setfld(data_struct, data_field_name, data);
+            data_struct = setfld(data_struct, data_field_name, data.');
+
         end
     end
-
     
     % End timer and display elapsed time
     toc
