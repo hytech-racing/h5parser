@@ -70,23 +70,28 @@ function [data_struct] = parseAsDouble(filename, check_fields_on_all_chunks)
             
             % If not the first group, check if data needs to be appended
             if(i > 0)
-                if(do_check)
-                    if (isa(data.Data,'numeric'))
-                        data.Data = double(data.Data)
+                try
+                    if(do_check)
+                        if (isa(data.Data,'numeric'))
+                            data.Data = double(data.Data)
+                        end
+                        % If checking, append data to existing field if it exists
+                        if(anyisfield(data_struct, data_field_name))
+                            data_struct.(data_field_name).Data = [data_struct.(data_field_name).Data; data.Data];
+                            data_struct.(data_field_name).Timestamp = [data_struct.(data_field_name).Timestamp; data.Timestamp];
+                        end
+                    else
+                        if (isa(data.Data,'numeric'))
+                            data.Data = double(data.Data)
+                        end
+                        % Append data to the existing field unconditionally
+                        data.Data = [getfld(data_struct, data_field_name).Data; data.Data];
+                        data.Timestamp = [getfld(data_struct, data_field_name).Timestamp; data.Timestamp];
                     end
-                    % If checking, append data to existing field if it exists
-                    if(anyisfield(data_struct, data_field_name))
-                        data_struct.(data_field_name).Data = [data_struct.(data_field_name).Data; data.Data];
-                        data_struct.(data_field_name).Timestamp = [data_struct.(data_field_name).Timestamp; data.Timestamp];
-                    end
-                else
-                    if (isa(data.Data,'numeric'))
-                        data.Data = double(data.Data)
-                    end
-                    % Append data to the existing field unconditionally
-                    data.Data = [getfld(data_struct, data_field_name).Data; data.Data];
-                    data.Timestamp = [getfld(data_struct, data_field_name).Timestamp; data.Timestamp];
+                catch fldErr
+                    % do nothing 
                 end
+                
             end
             if (isa(data.Data,'numeric'))
                 data.Data = double(data.Data)
