@@ -71,20 +71,25 @@ function [data_struct] = parseTableAsDouble(filename, check_fields_on_all_chunks
             
             % If not the first group, check if data needs to be appended
             if(i > 0)
-                if(do_check)
-                    if (isa(data{1,"Data"},'numeric'))
-                        data.Data = double(data.Data)
-                    end
-                    % If checking, append data to existing field if it exists
-                    if(anyisfield(data_struct, data_field_name))
+                try
+                    if(do_check)
+                        if (isa(data{1,"Data"},'numeric'))
+                            data.Data = double(data.Data)
+                        end
+                        % If checking, append data to existing field if it exists
+                        if(anyisfield(data_struct, data_field_name))
+                            data = [getfld(data_struct, data_field_name) ; data];
+                        end
+                    else
+                        if (isa(data{1,"Data"},'numeric'))
+                            data.Data = double(data.Data)
+                        end
+
+                        % Append data to the existing field unconditionally
                         data = [getfld(data_struct, data_field_name) ; data];
                     end
-                else
-                    if (isa(data{1,"Data"},'numeric'))
-                        data.Data = double(data.Data)
-                    end
-                    % Append data to the existing field unconditionally
-                    data = [getfld(data_struct, data_field_name) ; data];
+                catch fldErr
+                    % do nothing 
                 end
             end
             if (isa(data{1,"Data"},'numeric'))
