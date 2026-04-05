@@ -68,7 +68,8 @@ function [data_struct] = parseTable(filename, check_fields_on_all_chunks)
 
             % Convert fixed-length uint8 byte arrays (protobuf bytes fields)
             % to strings so struct2table sees matching row counts
-            if isfield(data, 'Data') && isa(data.Data, 'uint8') && ismatrix(data.Data)
+            dsMember = info.Groups.Groups(index).Datasets(j).Datatype.Type.Member(1).Datatype;
+            if strcmp(dsMember.Class, 'H5T_ARRAY') && dsMember.Size == 128
                 nRows = size(data.Data, 2);
                 strData = strings(nRows, 1);
                 for k = 1:nRows
