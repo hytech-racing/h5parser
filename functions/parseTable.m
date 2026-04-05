@@ -65,6 +65,19 @@ function [data_struct] = parseTable(filename, check_fields_on_all_chunks)
             
             % Read the dataset data
             data = h5read(filename, info.Groups.Groups(index).Name+"/"+data_field_name);
+
+            % Convert fixed-length uint8 byte arrays (protobuf bytes fields)
+            % to strings so struct2table sees matching row counts
+            if isfield(data, 'Data') && isa(data.Data, 'uint8') && ismatrix(data.Data)
+                nRows = size(data.Data, 2);
+                strData = strings(nRows, 1);
+                for k = 1:nRows
+                    raw = data.Data(:, k)';
+                    strData(k) = string(native2unicode(raw(raw ~= 0), 'UTF-8'));
+                end
+                data.Data = strData;
+            end
+
             data = struct2table(data)
 
             data = movevars(data,"Data",'After',"Timestamp");
